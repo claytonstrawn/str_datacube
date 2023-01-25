@@ -63,7 +63,7 @@ class DataCube:
         #(which is used for .__getitem__ so cannot be in the name)
         for i,l in enumerate(string_lists):
             if len(l) != data.shape[i]:
-                raise InvalidDataError('column %d has length %d, but %d labels were given.'%(i,data.shape[i],len(l)))
+                raise InvalidDataError('column %d has length %d, but %d labels were given. (labels:%s)'%(i,data.shape[i],len(l),l))
             for string in l:
                 if '-' in string:
                     raise InvalidDataError('Not allowed to use variable names containing "-". [violator: %s]'%string)
@@ -158,6 +158,7 @@ class DataCube:
             #this shrinks the array by one axis, or narrows one axis and retains shape
             #since "str_lists_to_use" is kept in order, this will work again in each run
             #of the for loop
+            print(arg,element_access_str)
             to_return = eval('to_return[%s]'%element_access_str[:-1])
         #one last clean-up of the current string lists still not accessed,
         #will create a new DataCube with these as arguments
