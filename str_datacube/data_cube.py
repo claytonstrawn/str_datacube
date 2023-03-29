@@ -98,11 +98,11 @@ class DataCube:
             args = args[0]
         for k in args:
             if not isinstance(k,str):
-                raise IndexError("arguments '%s' cannot be understood. Call with either "%args+\
+                raise IndexError("arguments '%s' cannot be understood. Call with either "%(args,)+\
                             "strings or tuple of strings")
         for arg in args:
             #only reference each axis once per item call, "not_used" are the axes to continue checking
-            not_used = list(set(current_string_list_names)-set(used)-set(modified))
+            not_used = list(set(current_string_list_names)-set(used))
             str_list_indices_to_use = sorted([current_string_list_numbers[k] for k in not_used])
             str_lists_to_use = [current_string_lists[k] for k in str_list_indices_to_use]
             #we are looking for a range, not a full axis call
@@ -113,6 +113,9 @@ class DataCube:
                     #will just search for "low" and check that high is there with it
                     #check each axis until it finds correct one, then break.
                     if low in l:
+                        if l in modified+used:
+                            raise InvalidDataError('cannot use the same axis multiple times within '+\
+                                            'a single call! axis:%s'%arg)
                         element0 = l.index(low)
                         element1 = l.index(high)+1
                         #range must be in same order as original string_list along that axis
@@ -144,6 +147,9 @@ class DataCube:
                 #check each axis until it finds correct one, then break.
                 for i,l in enumerate(str_lists_to_use):
                     if arg in l:
+                        if l in modified+used:
+                            raise InvalidDataError('cannot use the same axis multiple times within '+\
+                                            'a single call! axis:%s'%arg)
                         element = l.index(arg)
                         used.append(l[0])
                         break
@@ -158,7 +164,6 @@ class DataCube:
             #this shrinks the array by one axis, or narrows one axis and retains shape
             #since "str_lists_to_use" is kept in order, this will work again in each run
             #of the for loop
-            print(arg,element_access_str)
             to_return = eval('to_return[%s]'%element_access_str[:-1])
         #one last clean-up of the current string lists still not accessed,
         #will create a new DataCube with these as arguments
